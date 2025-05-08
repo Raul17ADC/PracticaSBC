@@ -1,0 +1,23 @@
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+ 
+SELECT DISTINCT 
+  ?persona AS ?Link 
+  (STR(?nombre) AS ?Nombre) 
+  (REPLACE(STRAFTER(STR(?deporte), "resource/"), "_", " ") AS ?Deporte)
+WHERE {
+  ?persona a foaf:Person .
+  ?persona ?p ?tema .
+  FILTER (?p IN (dct:subject, skos:subject)) .
+  FILTER (
+    CONTAINS(LCASE(STR(?tema)), "japon") ||
+    CONTAINS(LCASE(STR(?tema)), "japón")
+  )
+ 
+  OPTIONAL { ?persona foaf:name ?nombre . }
+  ?persona dbo:sport ?deporte .
+}
+LIMIT 100
+

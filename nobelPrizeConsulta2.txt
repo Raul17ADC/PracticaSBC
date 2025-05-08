@@ -1,0 +1,30 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?decada 
+       (STR(?totalPremiosRaw) AS ?totalPremios) 
+       (STR(?premiosOrganizacionRaw) AS ?premiosOrganizacion)
+WHERE {
+  {
+    SELECT ?decada (COUNT(DISTINCT ?premio) AS ?totalPremiosRaw) WHERE {
+      ?premio a <http://data.nobelprize.org/terms/LaureateAward> ;
+              <http://data.nobelprize.org/terms/year> ?anio .
+      BIND(STR(?anio) AS ?anioStr)
+      BIND(CONCAT("Década de ", SUBSTR(?anioStr, 1, 3), "0") AS ?decada)
+    }
+    GROUP BY ?decada
+  }
+
+  {
+    SELECT ?decada (COUNT(DISTINCT ?premio) AS ?premiosOrganizacionRaw) WHERE {
+      ?premio a <http://data.nobelprize.org/terms/LaureateAward> ;
+              <http://data.nobelprize.org/terms/year> ?anio ;
+              <http://data.nobelprize.org/terms/laureate> ?ganador .
+      FILTER NOT EXISTS { ?ganador foaf:gender ?genero }
+      BIND(STR(?anio) AS ?anioStr)
+      BIND(CONCAT("Década de ", SUBSTR(?anioStr, 1, 3), "0") AS ?decada)
+    }
+    GROUP BY ?decada
+  }
+}
+ORDER BY ?decada

@@ -1,0 +1,28 @@
+SELECT ?comunidadLabel ?provinciaLabel (IF(?provinciaOrden = ?primeraProvincia, STR(?numProvincias), "") AS ?numProvinciasTexto)
+WHERE {
+  {
+    SELECT ?comunidad ?comunidadLabel (COUNT(DISTINCT ?provincia) AS ?numProvincias)
+    WHERE {
+      ?provincia <http://vocab.linkeddata.es/datosabiertos/def/sector-publico/territorio#autonomia> ?comunidad .
+      ?provincia <http://www.w3.org/2000/01/rdf-schema#label> ?provinciaLabel .
+      ?comunidad <http://www.w3.org/2000/01/rdf-schema#label> ?comunidadLabel .
+    }
+    GROUP BY ?comunidad ?comunidadLabel
+  }
+
+  ?provincia <http://vocab.linkeddata.es/datosabiertos/def/sector-publico/territorio#autonomia> ?comunidad .
+  ?provincia <http://www.w3.org/2000/01/rdf-schema#label> ?provinciaLabel .
+
+  # Normalización para orden alfabético de provincias
+  BIND(REPLACE(LCASE(?provinciaLabel), "á", "a") AS ?provinciaOrden)
+
+  {
+    SELECT ?comunidad (MIN(REPLACE(LCASE(?provinciaLabel), "á", "a")) AS ?primeraProvincia)
+    WHERE {
+      ?provincia <http://vocab.linkeddata.es/datosabiertos/def/sector-publico/territorio#autonomia> ?comunidad .
+      ?provincia <http://www.w3.org/2000/01/rdf-schema#label> ?provinciaLabel .
+    }
+    GROUP BY ?comunidad
+  }
+}
+ORDER BY DESC(?numProvincias) ?comunidadLabel ?provinciaOrden

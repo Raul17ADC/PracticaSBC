@@ -1,0 +1,40 @@
+SELECT 
+  ?categoriaNombreES 
+  ?generoES 
+  (STR(COUNT(DISTINCT ?persona)) AS ?totalGanadores)
+WHERE {
+  {
+    # Subconsulta para calcular total por categoría
+    SELECT ?categoria (COUNT(DISTINCT ?persona) AS ?totalPremiosCategoria) WHERE {
+      ?premio a <http://data.nobelprize.org/terms/LaureateAward> ;
+              <http://data.nobelprize.org/terms/laureate> ?persona ;
+              <http://data.nobelprize.org/terms/category> ?categoria .
+    }
+    GROUP BY ?categoria
+  }
+
+  # Consulta principal
+  ?premio a <http://data.nobelprize.org/terms/LaureateAward> ;
+          <http://data.nobelprize.org/terms/laureate> ?persona ;
+          <http://data.nobelprize.org/terms/category> ?categoria .
+
+  ?persona <http://xmlns.com/foaf/0.1/gender> ?genero .
+
+  # Extraer y traducir nombre de categoría
+  BIND(STRAFTER(STR(?categoria), "category/") AS ?catText)
+  BIND(REPLACE(?catText, "_", " ") AS ?catNombre)
+  BIND(
+    IF(?catNombre = "Chemistry", "Química",
+    IF(?catNombre = "Physics", "Física",
+    IF(?catNombre = "Literature", "Literatura",
+    IF(?catNombre = "Peace", "Paz",
+    IF(?catNombre = "Economic Sciences", "Ciencias Económicas",
+    IF(?catNombre = "Physiology or Medicine", "Fisiología o Medicina", ?catNombre)))))) AS ?categoriaNombreES)
+
+  # Traducir género
+  BIND(
+    IF(?genero = "male", "hombre",
+    IF(?genero = "female", "mujer", ?genero)) AS ?generoES)
+}
+GROUP BY ?categoriaNombreES ?generoES ?totalPremiosCategoria
+ORDER BY ASC(?totalPremiosCategoria) ?categoriaNombreES ?generoES

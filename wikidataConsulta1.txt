@@ -1,0 +1,10 @@
+SELECT ?ideologiaLabel (COUNT(DISTINCT ?pais) AS ?numeroDePaises) WHERE {
+  ?pais wdt:P6 ?persona .
+  ?pais wdt:P31 wd:Q6256 .
+  ?persona wdt:P102 ?partido .
+  ?partido wdt:P1142 ?ideologia .
+
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "es". }
+}
+GROUP BY ?ideologiaLabel
+ORDER BY DESC(?numeroDePaises)

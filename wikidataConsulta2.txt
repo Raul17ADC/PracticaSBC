@@ -1,0 +1,15 @@
+SELECT ?paisLabel ?sitioLabel WHERE {
+  {
+    SELECT ?pais (COUNT(?sitio) AS ?totalSitios) WHERE {
+      ?sitio wdt:P1435 wd:Q9259 ;
+             wdt:P17 ?pais .
+    }
+    GROUP BY ?pais
+  }
+
+  ?sitio wdt:P1435 wd:Q9259 ;
+         wdt:P17 ?pais .
+
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "es". }
+}
+ORDER BY DESC(?totalSitios) ?paisLabel

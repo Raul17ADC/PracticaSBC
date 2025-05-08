@@ -1,0 +1,44 @@
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?tema (STR(?numDatasetsTema) AS ?totalDatasetsTexto) ?organizacionMax (STR(?numDatasetsOrg) AS ?orgDatasetsTexto)
+WHERE {
+  {
+    SELECT ?tema (COUNT(DISTINCT ?dataset) AS ?numDatasetsTema)
+    WHERE {
+      ?dataset a dcat:Dataset ;
+               dcat:theme ?tema .
+    }
+    GROUP BY ?tema
+  }
+
+  {
+    SELECT ?tema ?organizacionMax (COUNT(?dataset) AS ?numDatasetsOrg)
+    WHERE {
+      ?dataset a dcat:Dataset ;
+               dcat:theme ?tema ;
+               dct:publisher ?organizacionMax .
+    }
+    GROUP BY ?tema ?organizacionMax
+  }
+
+  {
+    SELECT ?tema (MAX(?cuenta) AS ?maxCuenta)
+    WHERE {
+      {
+        SELECT ?tema ?organizacion (COUNT(?dataset) AS ?cuenta)
+        WHERE {
+          ?dataset a dcat:Dataset ;
+                   dcat:theme ?tema ;
+                   dct:publisher ?organizacion .
+        }
+        GROUP BY ?tema ?organizacion
+      }
+    }
+    GROUP BY ?tema
+  }
+
+  FILTER(?numDatasetsOrg = ?maxCuenta)
+}
+ORDER BY DESC(xsd:integer(?totalDatasetsTexto))

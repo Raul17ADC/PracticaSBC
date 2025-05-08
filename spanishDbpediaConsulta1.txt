@@ -1,0 +1,16 @@
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX dbr: <http://dbpedia.org/resource/>
+ 
+SELECT DISTINCT ?name ?description ?urlWikidata WHERE {
+  ?person a dbo:Person ;
+          foaf:name ?name ;
+          dbo:abstract ?description ;
+          dbo:birthPlace dbr:Spain ; 
+          owl:sameAs ?urlWikidata .
+  FILTER (STRSTARTS(STR(?urlWikidata), "http://www.wikidata.org/entity/"))
+  FILTER (lang(?name) = "en")
+  FILTER (lang(?description) = "ja")
+}
+ORDER BY ?name
