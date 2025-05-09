@@ -223,7 +223,7 @@ def search_actors():
 # --- Interfaz principal ---
 window = tk.Tk()
 window.title("Actores del mundo")
-window.geometry("560x550")
+window.geometry("800x560")
 window.resizable(False, False)
 
 filters_frame = tk.Frame(window)
@@ -338,9 +338,9 @@ def buscar_detalles_actor():
             return "No disponible"
 
     def add_row(label, value, row):
-        tk.Label(table_frame, text=label + ":", font=("Arial", 10, "bold"), bg="white", anchor="w")\
+        tk.Label(table_frame, text=label + ":", font=("Arial", 10, "bold"), bg="white",fg="black", anchor="w")\
             .grid(row=row, column=0, sticky="w", pady=2)
-        tk.Label(table_frame, text=value, font=("Arial", 10), bg="white", anchor="w", wraplength=300)\
+        tk.Label(table_frame, text=value, font=("Arial", 10), bg="white", anchor="w", fg="black", wraplength=300)\
             .grid(row=row, column=1, sticky="w", pady=2)
 
     add_row("Nombre", info.get("Nombre", actor_name), 0)
@@ -394,12 +394,14 @@ def buscar_detalles_actor():
              text="Películas:",
              font=("Arial", 10, "bold"),
              bg="white",
+             fg="black",
              anchor="w").pack(fill="x")
     peliculas_text = ", ".join(peliculas) if peliculas else "No disponible"
     pel_text = tk.Text(main_frame,
                        height=4,
                        wrap="word",
                        bg="#f9f9f9",
+                       fg="black",
                        font=("Arial", 10),
                        relief="groove")
     pel_text.insert("1.0", peliculas_text)
@@ -412,13 +414,15 @@ def buscar_detalles_actor():
              text="Descripción:",
              font=("Arial", 10, "bold"),
              bg="white",
+             fg="black",
              anchor="w").pack(fill="x")
     desc_text = tk.Text(main_frame,
-                        height=4,
-                        wrap="word",
-                        bg="#f9f9f9",
-                        font=("Arial", 10),
-                        relief="groove")
+                    height=4,
+                    wrap="word",
+                    bg="#f9f9f9",
+                    fg="black",  # color del texto
+                    font=("Arial", 10),
+                    relief="groove")
     desc_text.insert("1.0", info.get("Descripción", "No disponible"))
     desc_text.config(state="disabled")
     desc_text.pack(fill="x")
@@ -429,11 +433,13 @@ def buscar_detalles_actor():
              text="Premios:",
              font=("Arial", 10, "bold"),
              bg="white",
+             fg="black",
              anchor="w").pack(fill="x")
     awards_text = tk.Text(main_frame,
                           height=4,
                           wrap="word",
                           bg="#f9f9f9",
+                          fg="black",
                           font=("Arial", 10),
                           relief="groove")
     awards_text.insert("1.0", info.get("Premios", "No disponible"))
