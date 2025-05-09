@@ -1,0 +1,19 @@
+PREFIX up: <http://purl.uniprot.org/core/>
+PREFIX taxon: <http://purl.uniprot.org/taxonomy/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT ?proteinaTexto ?genTexto ?comentarioTexto
+WHERE {
+  ?protein a up:Protein;
+           up:organism taxon:9685;
+           rdfs:label ?nombreProteina;
+           up:encodedBy ?gene;
+           up:annotation ?nota.
+  ?gene skos:prefLabel ?nombreGen.
+  ?nota a up:Disease_Annotation;
+         rdfs:comment ?comentario.
+  BIND(STR(?nombreProteina) AS ?proteinaTexto)
+  BIND(STR(?nombreGen) AS ?genTexto)
+  BIND(STR(?comentario) AS ?comentarioTexto)
+}
+LIMIT 50
