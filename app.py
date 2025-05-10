@@ -91,14 +91,12 @@ def get_wikidata_info(actor_name):
     }
 
 
-def get_actor_movie_genres(actor_name):
+def get_actor_movies(actor_name):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-    sparql.addCustomHttpHeader("User-Agent",
-                               "ActoresDelMundo/1.0 (contacto@ejemplo.com)")
+    sparql.addCustomHttpHeader("User-Agent", "ActoresDelMundo/1.0 (contacto@ejemplo.com)")
     sparql.setQuery(f"""
     SELECT DISTINCT ?filmLabel WHERE {{
-      ?actor ?label "{actor_name}"@en.
-      ?actor wdt:P31 wd:Q5.
+      ?actor rdfs:label "{actor_name}"@en.
       ?film wdt:P161 ?actor.
       SERVICE wikibase:label {{ bd:serviceParam wikibase:language "es,en". }}
     }}
@@ -108,6 +106,22 @@ def get_actor_movie_genres(actor_name):
     results = sparql.query().convert()
     return [r["filmLabel"]["value"] for r in results["results"]["bindings"]]
 
+def get_actor_movie_genres(actor_name):
+    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+    sparql.addCustomHttpHeader("User-Agent", "ActoresDelMundo/1.0 (contacto@ejemplo.com)")
+    sparql.setQuery(f"""
+    SELECT DISTINCT ?genreLabel WHERE {{
+      ?actor ?label "{actor_name}"@en.
+      ?actor wdt:P31 wd:Q5.
+      ?film wdt:P161 ?actor.
+      ?film wdt:P136 ?genre.
+      SERVICE wikibase:label {{ bd:serviceParam wikibase:language "es,en". }}
+    }}
+    LIMIT 20
+    """)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    return [r["genreLabel"]["value"] for r in results["results"]["bindings"]]
 
 def calculate_age(dob_str):
     try:
@@ -140,7 +154,9 @@ def ejecutar_busqueda(loading_window, country_disp, age_range, genre_disp):
             if not info:
                 continue
 
-            age = calculate_age(info.get("Date of birth", ""))
+            age = calculate_age(info.get("Fecha de nacimiento", ""))
+            if age is None:
+                continue
             if age_range == "20-30" and not (20 <= age <= 30):
                 continue
             if age_range == "31-40" and not (31 <= age <= 40):
@@ -150,7 +166,7 @@ def ejecutar_busqueda(loading_window, country_disp, age_range, genre_disp):
 
             if genre:
                 movie_genres = get_actor_movie_genres(actor_name)
-                if not any(genre.lower() == g.lower() for g in movie_genres):
+                if not any(genre.lower() in g.lower() for g in movie_genres):
                     continue
 
             filtered_actors.append((actor_name, uri))
@@ -299,7 +315,8 @@ def buscar_detalles_actor():
         return
 
     info = get_wikidata_info(actor_name)
-    peliculas = get_actor_movie_genres(actor_name)
+    peliculas = get_actor_movies(actor_name)
+    generos_peliculas = get_actor_movie_genres(actor_name)
 
     detail_window = tk.Toplevel(window)
     detail_window.title("Ficha del actor/actriz")
@@ -407,6 +424,27 @@ def buscar_detalles_actor():
     pel_text.insert("1.0", peliculas_text)
     pel_text.config(state="disabled")
     pel_text.pack(fill="x")
+
+    # Géneros de películas
+    separador()
+    tk.Label(main_frame,
+            text="Géneros de películas:",
+            font=("Arial", 10, "bold"),
+            bg="white",
+            fg="black",
+            anchor="w").pack(fill="x")
+
+    generos_text = ", ".join(generos_peliculas) if generos_peliculas else "No disponible"
+    genre_box = tk.Text(main_frame,
+                    height=3,
+                    wrap="word",
+                    bg="#f9f9f9",
+                    fg="black",
+                    font=("Arial", 10),
+                    relief="groove")
+    genre_box.insert("1.0", generos_text)
+    genre_box.config(state="disabled")
+    genre_box.pack(fill="x", pady=(0, 10))
 
     # Descripción
     separador()
