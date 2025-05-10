@@ -498,7 +498,7 @@ ttk.Entry(extra_frame,
           textvariable=selected_actor_var,
           width=40,
           state="readonly").grid(row=1, column=0, padx=5)
-tk.Button(extra_frame, text="Buscar",
+tk.Button(extra_frame, text="Detalles",
           command=buscar_detalles_actor).grid(row=1, column=1, padx=5)
 
 window.mainloop()
