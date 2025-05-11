@@ -93,7 +93,8 @@ def get_wikidata_info(actor_name):
 
 def get_actor_movies(actor_name):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-    sparql.addCustomHttpHeader("User-Agent", "ActoresDelMundo/1.0 (contacto@ejemplo.com)")
+    sparql.addCustomHttpHeader("User-Agent",
+                               "ActoresDelMundo/1.0 (contacto@ejemplo.com)")
     sparql.setQuery(f"""
     SELECT DISTINCT ?filmLabel WHERE {{
       ?actor rdfs:label "{actor_name}"@en.
@@ -106,9 +107,11 @@ def get_actor_movies(actor_name):
     results = sparql.query().convert()
     return [r["filmLabel"]["value"] for r in results["results"]["bindings"]]
 
+
 def get_actor_movie_genres(actor_name):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-    sparql.addCustomHttpHeader("User-Agent", "ActoresDelMundo/1.0 (contacto@ejemplo.com)")
+    sparql.addCustomHttpHeader("User-Agent",
+                               "ActoresDelMundo/1.0 (contacto@ejemplo.com)")
     sparql.setQuery(f"""
     SELECT DISTINCT ?genreLabel WHERE {{
       ?actor ?label "{actor_name}"@en.
@@ -122,6 +125,7 @@ def get_actor_movie_genres(actor_name):
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
     return [r["genreLabel"]["value"] for r in results["results"]["bindings"]]
+
 
 def calculate_age(dob_str):
     try:
@@ -312,6 +316,22 @@ def on_actor_selected(event):
 def buscar_detalles_actor():
     actor_name = selected_actor_var.get()
     if not actor_name:
+        aviso = tk.Toplevel(window)
+        aviso.title("Actor no seleccionado")
+        aviso.geometry("300x120")
+        aviso.resizable(False, False)
+        aviso.grab_set()
+        aviso.transient(window)
+
+        tk.Label(aviso,
+                 text="Primero debes seleccionar un actor de la lista.",
+                 font=("Arial", 10),
+                 wraplength=260).pack(pady=20)
+        tk.Button(aviso, text="Cerrar", command=aviso.destroy).pack()
+
+        x = window.winfo_x() + (window.winfo_width() // 2) - 150
+        y = window.winfo_y() + (window.winfo_height() // 2) - 60
+        aviso.geometry(f"+{x}+{y}")
         return
 
     info = get_wikidata_info(actor_name)
@@ -428,20 +448,21 @@ def buscar_detalles_actor():
     # Géneros de películas
     separador()
     tk.Label(main_frame,
-            text="Géneros de películas:",
-            font=("Arial", 10, "bold"),
-            bg="white",
-            fg="black",
-            anchor="w").pack(fill="x")
+             text="Géneros de películas:",
+             font=("Arial", 10, "bold"),
+             bg="white",
+             fg="black",
+             anchor="w").pack(fill="x")
 
-    generos_text = ", ".join(generos_peliculas) if generos_peliculas else "No disponible"
+    generos_text = ", ".join(
+        generos_peliculas) if generos_peliculas else "No disponible"
     genre_box = tk.Text(main_frame,
-                    height=3,
-                    wrap="word",
-                    bg="#f9f9f9",
-                    fg="black",
-                    font=("Arial", 10),
-                    relief="groove")
+                        height=3,
+                        wrap="word",
+                        bg="#f9f9f9",
+                        fg="black",
+                        font=("Arial", 10),
+                        relief="groove")
     genre_box.insert("1.0", generos_text)
     genre_box.config(state="disabled")
     genre_box.pack(fill="x", pady=(0, 10))
@@ -454,13 +475,14 @@ def buscar_detalles_actor():
              bg="white",
              fg="black",
              anchor="w").pack(fill="x")
-    desc_text = tk.Text(main_frame,
-                    height=4,
-                    wrap="word",
-                    bg="#f9f9f9",
-                    fg="black",  # color del texto
-                    font=("Arial", 10),
-                    relief="groove")
+    desc_text = tk.Text(
+        main_frame,
+        height=4,
+        wrap="word",
+        bg="#f9f9f9",
+        fg="black",  # color del texto
+        font=("Arial", 10),
+        relief="groove")
     desc_text.insert("1.0", info.get("Descripción", "No disponible"))
     desc_text.config(state="disabled")
     desc_text.pack(fill="x")
